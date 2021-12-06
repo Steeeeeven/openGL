@@ -33,7 +33,7 @@ int main()
     //每次窗口大小被调整的时候被调用
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     
-    //给GLAD传入了用来加载系统相关的OpenGL函数指针地址的函数   GLFW提供的procaddress
+    //给GLAD传入了用来加载系统相关的OpenGL函数指针地址的函数   GLFW提供的procAddress
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
         std::cout << "Failed to initialize GLAD" << std::endl;
@@ -150,26 +150,28 @@ int main()
     glDeleteShader(fragmentShader);
 
     //链接顶点属性, 解释顶点数据
-    //要配置属性的顶点、顶点属性的维数、属性数据类型(vec*由浮点数组成)、是否希望数据被标准化(0~1)、
+    //TODO要配置属性的顶点、顶点属性的维数、属性数据类型(vec*由浮点数组成)、是否希望数据被标准化(0~1)、
     //步长(顶点属性之间的间隔, 这里是三个float, 并且互相紧密相连)、offset
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
     //以顶点属性位置值作为参数，启用顶点属性
     glEnableVertexAttribArray(0);
 
+    unsigned int VAO;
+    glGenVertexArrays(1, &VAO);
 
+    // 1. 绑定VAO
+    glBindVertexArray(VAO);
 
+    // 2. 把顶点数组复制到缓冲中供OpenGL使用
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
+    // 3. 设置顶点属性指针
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
 
-
-
-
-
-
-
-
-
-
+    
 
 #if 1
     //RenderLoop
@@ -177,7 +179,11 @@ int main()
     {
         /* 可能的缓冲位有GL_COLOR_BUFFER_BIT，GL_DEPTH_BUFFER_BIT和GL_STENCIL_BUFFER_BIT */
         /* 现在只清除颜色缓存 */
-        //glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT);
+        
+        glUseProgram(shaderProgram);
+        glBindVertexArray(VAO);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
         
         //渲染循环的每一个迭代中调用  这个用来检查esc是否被按下(输入控制)
         std::cout << "loop begin:frame" << frame << std::endl;
